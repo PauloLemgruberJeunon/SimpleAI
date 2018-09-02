@@ -1,18 +1,21 @@
 import numpy as np
 from sklearn.metrics import mean_squared_error as mqe
 
-
 TamPop = 10
-TaxMut = 0.01
+TaxMut = 1
 num_layers = 2
 layers_sizes = [2, 1]
 feature_qty = 1
+maxx = 1
+g = 1
 
 
+# Avaliation function
 def nothing(x):
     return np.array(x)
 
 
+# Avaliation function
 def sigmoid(x):
     x = np.array(x)
     result = np.empty(x.shape)
@@ -30,18 +33,7 @@ def create_neural_net(num_layers, layers_sizes, feature_qty):
     return neural_net
 
 
-def predict(neural_net, features, activation_func):
-    num_layers = neural_net.shape[0]
-    result = np.array(np.append(features, 1))
-    for i in range(num_layers):
-        result = np.matmul(result, neural_net[i])
-        result = activation_func(result)
-        result = np.append(result, 1)
-
-    result = np.delete(result, -1)
-    return result
-
-
+# Generate initial population
 def initPop():
     ind = np.zeros(TamPop, dtype=np.ndarray)
     for i in range(TamPop):
@@ -49,30 +41,71 @@ def initPop():
     return ind
 
 
-def square_func(x):
-    return [a * a + 5 for a in x]
+def predict(neural_net, features, activation_func):
+    num_layers = neural_net.shape[0]
+    result = np.array(np.append(features, 1))
+    for i in range(num_layers):
+        result = np.matmul(result, neural_net[i])
+        result = activation_func(result)
+        result = np.append(result, 1)
+    result = np.delete(result, -1)
+    return result
 
 
-def eval(ind):
+# Avaliation function
+def eval(ind, correct_data):
     fit = np.zeros(TamPop)
-    for i in range(TamPop):
-        fit[i] = predict(ind[i], 10, nothing)
+    # Temp array used to recive the predicted values from the neural network.
+    predictTemp = np.zeros(len(correct_data))
+    for i in range(TamPop):  # For each neural network.
+        for j in range(len(correct_data)):  # For each value to be predicted.
+            predictTemp[j] = predict(ind[i], correct_data[j], nothing)
+        # Calculates fit using the mean square error function of the predicted values and the correct values.
+        fit[i] = 1 + 1 / mqe(predictTemp, correct_data)
+
+    print('Correct Data: ')
+    print(correct_data)
+    print('\n')
+    print('Data from Neural Network:')
+    print(predictTemp.reshape([19, 1]))
     return fit
 
 
-def crossover(fit):
+def crossover(ind, fit):
     maxfit = fit[1]
     maxi = 1
-    for i in range(0, TamPop):  # Busca pelo melhor individuo
+    for i in range(0, TamPop):  # Search for the best. We don't kill the best!
         if (fit[i] > maxfit):
             maxfit = fit[i]
             maxi = i
 
+    for i in range(0, TamPop):
+        if(i == maxi):
+            continue  # Protect the best.
+        # Crossover
+        ind[i] = (ind[i] + ind[maxi]) / 2.0  # Using simple mean.
+        # Mutation
+        ind[i] = ind[i] + ((np.random.uniform(-1, 1) % maxx - (maxx / 2.0)) /
+                           100.0) * TaxMut  # Very important!
 
+
+def square_func(x):
+    return [a * a + 5 for a in x]
+
+
+# Array with correct data collected from a square function.
 correct_data = square_func(range(-9, 10))
-ind = initPop()
-fit = eval(ind)
-crossover(fit)
+ind = initPop()  # Start population with random values in a range.
 
+while(1):
+    print('\n')
+    print('AG Generation: ')
+    print(g)
+
+    fit = eval(ind, correct_data)
+    crossover(ind, fit)
+    g = g + 1
+
+# Ultima aula, n prestei tanta atencao =/
 # Quanto mais evoluido estamos, mais dificil eh de evoluir mais.
-# Vamos mutar todo mundo, MENOS o melhor de todos.
+# Vamos mutar todo mundo, MENOS o melhor de todos. Podemos pensar em diferentes taxas de mutacao caso esteja com erro baixo.
