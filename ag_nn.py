@@ -6,8 +6,8 @@ from sklearn.metrics import mean_squared_error as mqe
 np.set_printoptions(precision=3)
 
 
-TAM_POP = 30
-TAX_MUT = 0.05
+TAM_POP = 50
+TAX_MUT = 0.01
 LAYERS_SIZES = [8, 8, 3]
 FEATURE_QTY = 4
 MAXX = 1
@@ -171,27 +171,27 @@ def iris_crossover(ind, fit):
         if i == maxi:
             continue
 
-        a = int((np.random.rand() % TAM_POP) + 1)
-        b = int((np.random.rand() % TAM_POP) + 1)
+        a = rint(0,TAM_POP-1)
+        b = rint(0,TAM_POP-1)
         if fit[a] > fit[b]:
             pai1 = a
         else:
             pai1 = b
 
-        a = int((np.random.rand() % TAM_POP) + 1)
-        b = int((np.random.rand() % TAM_POP) + 1)
+        a = rint(0,TAM_POP-1)
+        b = rint(0,TAM_POP-1)
         if fit[a] > fit[b]:
             pai2 = a
         else:
             pai2 = b
 
-        rand = rint(0, len(LAYERS_SIZES)-1)
-        ind[i][rand] = ind[pai1][rand]
-        rand = rint(0, len(LAYERS_SIZES)-1)
-        ind[i][rand] = ind[maxi][rand]
-        rand = rint(0, len(LAYERS_SIZES)-1)
-        ind[i][rand] = ind[pai2][rand]
+        CROSSOVER_INDEX = [pai1, pai2, maxi]
 
+        for j in range(len(LAYERS_SIZES)):
+            rand = rint(0, len(LAYERS_SIZES)-1)
+            ind[i][rand] = ind[CROSSOVER_INDEX[j]][rand]
+            rand = rint(0, len(LAYERS_SIZES)-1)
+            ind[i][rand] = ind[i][rand] + np.random.uniform(-1,1)*TAX_MUT
 
 IND = init_pop()  # Start population with random values in a range.
 
