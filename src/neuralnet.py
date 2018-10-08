@@ -26,8 +26,11 @@ class NeuralNet:
             for p in range(len(predictions)):
                 print('y = ' + str(y_array[p][0]))
                 print('predict = ' + str(predictions[p][-1]))
-                rights += 1 if np.abs(y_array[p] - predictions[p][-1]) < 0.5 else 0
-                deltas[-1] = np.multiply(np.subtract(y_array[p], predictions[p][-1]),
+
+                rights += 1 if np.argmax(predictions[p][-1]) == y_array[p] else 0
+                y = np.zeros(3)
+                y[int(y_array[p])] = 1
+                deltas[-1] = np.multiply(np.subtract(y, predictions[p][-1]),
                                          self.layers[-1].activation_fcn.grad(predictions[p][-1]))
 
                 for l in range(len(self.layers) - 2, -1, -1):
@@ -46,8 +49,14 @@ class NeuralNet:
                     for i in range(mtr.shape[0]):
                         for j in range(mtr.shape[1]):
                             mtr[i][j] = mtr[i][j] + (n * deltas[l][j] * input_with_bias[i])
+
+            print('epoch = ' + str(e))
             print('acc = ' + str(rights / len(predictions)))
             print('\n')
+
+            # for l in self.layers:
+            #     print(l.weight_mtr)
+            # quit()
 
 
 class NeuralLayer:
