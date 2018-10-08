@@ -18,17 +18,36 @@ class NeuralNet:
             actv_values[i + 1] = self.layers[i].feed_foward(actv_values[i])
         return actv_values[1:]
 
-    def fit(self, x_array, y_array, epochs):
-        predictions = [np.array(self.fit_predict(x), dtype=float) for x in x_array]
+    def fit(self, x_array, y_array, epochs, n):
         deltas = np.zeros(len(self.layers), dtype=np.ndarray)
-        for p in range(len(predictions)):
-            deltas[-1] = np.multiply(np.subtract(predictions[p][-1], y_array[p]),
-                                     self.layers[-1].activation_fcn.grad(predictions[p][-1]))
-            print(deltas)
-            quit()
-            for l in range(len(self.layers) - 2, -1, -1):
-                deltas[l] = np.multiply(np.matmul(self.layers[l].weight_mtr.transpose(), deltas[l + 1]),
-                                        self.layers[l].activation_fcn.grad(predictions[p][l]))
+        for e in range(epochs):
+            predictions = [np.array(self.fit_predict(x), dtype=np.ndarray) for x in x_array]
+            rights = 0
+            for p in range(len(predictions)):
+                print('y = ' + str(y_array[p][0]))
+                print('predict = ' + str(predictions[p][-1]))
+                rights += 1 if np.abs(y_array[p] - predictions[p][-1]) < 0.5 else 0
+                deltas[-1] = np.multiply(np.subtract(y_array[p], predictions[p][-1]),
+                                         self.layers[-1].activation_fcn.grad(predictions[p][-1]))
+
+                for l in range(len(self.layers) - 2, -1, -1):
+                    deltas[l] = np.multiply(np.matmul(self.layers[l + 1].weight_mtr[1:, :], deltas[l + 1]),
+                                            self.layers[l].activation_fcn.grad(predictions[p][l]))
+
+                input_with_bias = np.append(1, x_array[p])
+                for i in range(self.layers[0].weight_mtr.shape[0]):
+                    for j in range(self.layers[0].weight_mtr.shape[1]):
+                        self.layers[0].weight_mtr[i][j] = self.layers[0].weight_mtr[i][j] + \
+                            (n * deltas[0][j] * input_with_bias[i])
+
+                for l in range(1, len(self.layers)):
+                    mtr = self.layers[l].weight_mtr
+                    input_with_bias = np.append(1, predictions[p][l - 1])
+                    for i in range(mtr.shape[0]):
+                        for j in range(mtr.shape[1]):
+                            mtr[i][j] = mtr[i][j] + (n * deltas[l][j] * input_with_bias[i])
+            print('acc = ' + str(rights / len(predictions)))
+            print('\n')
 
 
 class NeuralLayer:
@@ -42,7 +61,7 @@ class NeuralLayer:
         self.weight_mtr = np.random.uniform(-1, 1, (self.input_size + 1, self.number_of_neurons))
 
     def feed_foward(self, input_array):
-        return self.activation_fcn.actv((np.matmul(np.append(1, input_array), self.weight_mtr)))
+        return self.activation_fcn.actv(np.matmul(np.append(1, input_array), self.weight_mtr))
 
 
 class NeuralFactory:
