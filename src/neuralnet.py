@@ -77,7 +77,7 @@ class NeuralFactory:
     def __init__(self):
         pass
 
-    def create_neural_net(self, hidden_actv_fcn, final_actv_fcn, layers_sizes, input_size):
+    def create(self, hidden_actv_fcn, final_actv_fcn, layers_sizes, input_size):
         num_layers = len(layers_sizes)
         layers = np.zeros(num_layers, dtype=np.ndarray)
         layers[0] = NeuralLayer(layers_sizes[0], hidden_actv_fcn, input_size)

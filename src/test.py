@@ -3,8 +3,8 @@ import numpy as np
 import csv
 
 nf = nn.NeuralFactory()
-nn = nf.create_neural_net(hidden_actv_fcn=nn.ActivationFcn(), final_actv_fcn=nn.ActivationFcn(),
-                          layers_sizes=[6, 3], input_size=4)
+nn = nf.create(hidden_actv_fcn=nn.ActivationFcn(), final_actv_fcn=nn.ActivationFcn(),
+               layers_sizes=[6, 3], input_size=4)
 
 with open("../dataset/iris.data") as csv_file:
     CSV_READER = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
