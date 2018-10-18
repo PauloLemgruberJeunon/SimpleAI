@@ -11,6 +11,11 @@ class NeuralNet:
             result = self.layers[i].feed_foward(result)
         return result
 
+    def evaluate(self, input_array, y_array):
+        result = self.predict(input_array=input_array)
+        return 1 if y_array[np.argmax(result)] == 1 else 0
+        # return 1 / (1 + np.sum(np.abs(np.subtract(result, y_array))))
+
     def fit_predict(self, input_array):
         actv_values = np.zeros(len(self.layers) + 1, dtype=np.ndarray)
         actv_values[0] = np.array(input_array, dtype=float)
@@ -18,6 +23,7 @@ class NeuralNet:
             actv_values[i + 1] = self.layers[i].feed_foward(actv_values[i])
         return actv_values[1:]
 
+    # Endireitar essa função na parte de avaliação do erro
     def fit(self, x_array, y_array, epochs, n):
         deltas = np.zeros(len(self.layers), dtype=np.ndarray)
         for e in range(epochs):
@@ -54,19 +60,12 @@ class NeuralNet:
             print('acc = ' + str(rights / len(predictions)))
             print('\n')
 
-            # for l in self.layers:
-            #     print(l.weight_mtr)
-            # quit()
-
 
 class NeuralLayer:
     def __init__(self, number_of_neurons, actv_fcn, input_size):
         self.activation_fcn = actv_fcn
         self.number_of_neurons = number_of_neurons
         self.input_size = input_size
-        # print(self.input_size)
-        # print(self.number_of_neurons)
-        # print()
         self.weight_mtr = np.random.uniform(-1, 1, (self.input_size + 1, self.number_of_neurons))
 
     def feed_foward(self, input_array):
