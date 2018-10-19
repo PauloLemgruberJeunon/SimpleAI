@@ -1,9 +1,14 @@
 import numpy as np
+import pickle
 
 
 class NeuralNet:
     def __init__(self, layers):
         self.layers = layers
+
+    def save_neural_net(self, where):
+        with open(where, 'wb') as out_file:
+            pickle.dump(self, out_file, pickle.HIGHEST_PROTOCOL)
 
     def predict(self, input_array):
         result = input_array.copy()
@@ -97,3 +102,8 @@ class ActivationFcn:
 
     def grad(self, val_array):
         return np.multiply(val_array, np.subtract(1, val_array))
+
+
+def load_neural_net(where):
+    with open(where, 'rb') as in_file:
+        return pickle.load(in_file)
